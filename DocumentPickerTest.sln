@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentPickerTest.iOS", "DocumentPickerTest.iOS\DocumentPickerTest.iOS.csproj", "{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Release|iPhone = Release|iPhone
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+		Debug|iPhone = Debug|iPhone
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Release|iPhone.ActiveCfg = Release|iPhone
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Release|iPhone.Build.0 = Release|iPhone
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{A0B00EFD-3A43-4AB4-A846-E0EFA052B882}.Debug|iPhone.Build.0 = Debug|iPhone
+	EndGlobalSection
+EndGlobal
