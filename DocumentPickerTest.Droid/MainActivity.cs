@@ -2,8 +2,14 @@
 using Android.Widget;
 using Android.OS;
 using Android.Content;
-using Android.Net;
 using Android.Provider;
+using System.IO;
+using System.Threading.Tasks;
+using Android.Webkit;
+using Android.Support.V4.Content;
+using Android.Content.PM;
+using System.Linq;
+using System;
 
 namespace DocumentPickerTest.Droid
 {
@@ -14,7 +20,6 @@ namespace DocumentPickerTest.Droid
 
         private TextView _docName;
         private TextView _docPath;
-        private Intent _resultIntent;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -34,36 +39,59 @@ namespace DocumentPickerTest.Droid
             openDoc.Click += OpenDoc_Click;
         }
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             if (requestCode != PickActionRequestCode || resultCode != Result.Ok)
             {
                 return;
             }
-            _resultIntent = data;
-            var uri = _resultIntent.Data;
-            _docName.Text = GetDocName(uri);
-            _docPath.Text = uri.Path;
+            _docName.Text = GetDocName(data.Data);
+            _docPath.Text = await SaveDoc(data.Data);
         }
 
-        void PicDoc_Click(object sender, System.EventArgs e)
+        void PicDoc_Click(object sender, EventArgs e)
         {
             var intent = new Intent(Intent.ActionGetContent);
             intent.AddCategory(Intent.CategoryOpenable);
             intent.SetType("*/*");
-            var mimeTypes = new []{"image/*", "video/*", "application/pdf"};
-            intent.PutExtra(Intent.ExtraMimeTypes, mimeTypes);
             StartActivityForResult(intent, PickActionRequestCode);        
         }
 
-        void OpenDoc_Click(object sender, System.EventArgs e)
+        void OpenDoc_Click(object sender, EventArgs e)
         {
-            var intent = new Intent(Intent.ActionView);
-            intent.SetDataAndType(_resultIntent.Data, _resultIntent.Type);
-            StartActivity(intent);
+            if (string.IsNullOrEmpty(_docPath.Text) || Equals(_docPath.Text, "Document path"))
+            {
+                return;
+            }
+
+            try
+            {
+                var intent = new Intent(Intent.ActionView);
+                var uri = FileProvider.GetUriForFile(this, $"{PackageName}.fileprovider", new Java.IO.File(_docPath.Text));
+                var type = MimeTypeMap.Singleton.GetMimeTypeFromExtension(MimeTypeMap.GetFileExtensionFromUrl(_docPath.Text));
+                intent.SetDataAndType(uri, type);
+
+                var resolveInfos = PackageManager.QueryIntentActivities(intent, PackageInfoFlags.MatchDefaultOnly);
+                if (!resolveInfos.Any())
+                {
+                    Toast.MakeText(this, "Unable to open the file, no suitable app found", ToastLength.Long).Show();
+                    return;
+                }
+
+                foreach (var ri in resolveInfos)
+                {
+                    GrantUriPermission(ri.ActivityInfo.PackageName, uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                }
+
+                StartActivity(intent);
+            }
+            catch(Exception ex)
+            {
+                Toast.MakeText(this, $"Unable to open the file {ex.Message}", ToastLength.Long).Show();
+            }
         }
 
-        private string GetDocName(Uri uri)
+        private string GetDocName(Android.Net.Uri uri)
         {
             var cursor = ContentResolver.Query(uri, null, null, null, null, null);
             try
@@ -79,9 +107,24 @@ namespace DocumentPickerTest.Droid
                 cursor.Close();
             }
         }
-        private void SaveDoc(Uri uri, string targetPath)
+        private async Task<string> SaveDoc(Android.Net.Uri uri)
         {
-            //todo strore file in temp location (e.g. cache)
+            try
+            {
+                var outPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), _docName.Text);
+                using (var inStream = ContentResolver.OpenInputStream(uri))
+                {
+                    using (var outStream = File.Create(outPath))
+                    {
+                        await inStream.CopyToAsync(outStream);
+                    }
+                }
+                return outPath;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
