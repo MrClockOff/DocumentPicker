@@ -68,6 +68,10 @@ namespace DocumentPickerTest.iOS
 
         partial void OpenSelectedDoc_TouchUpInside(UIButton sender)
         {
+            if(string.IsNullOrEmpty(DocPath.Text) || Equals(DocPath.Text, "Document path"))
+            {
+                return;
+            }
             var url = NSUrl.FromString(DocPath.Text);
             var docPreview = UIDocumentInteractionController.FromUrl(url);
             docPreview.Name = DocName.Text;
